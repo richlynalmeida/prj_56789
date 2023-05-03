@@ -41,7 +41,7 @@ class WAS(models.Model):
     wbs = models.ForeignKey(WBS, on_delete=models.CASCADE, verbose_name='WBS ID', default=1)
     was_code = models.CharField(unique=True, max_length=5, verbose_name='WAS Code')
     was_title = models.CharField(unique=True, max_length=55, blank=True, null=True,
-                                verbose_name='WAS Title')
+                                 verbose_name='WAS Title')
     comments = models.CharField(max_length=2000, blank=True, null=True, verbose_name='Comments')
 
     class Meta:

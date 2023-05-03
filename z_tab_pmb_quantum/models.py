@@ -16,6 +16,29 @@ from e_commodities.models import CommodityDetail
 from g_measures.models import MilepostTemplate
 
 
+class ERF(models.Model):
+    erf_code = models.CharField(unique=True, max_length=55, verbose_name='ERF Code')
+    erf_title = models.CharField(unique=False, max_length=200, blank=True, null=True,
+                                 verbose_name='ERF Title')
+    comments = models.CharField(max_length=2000, blank=True, null=True, verbose_name='Comments')
+    cost_type = models.ForeignKey(CostType, on_delete=models.CASCADE, verbose_name='Cost Type ID',
+                                  default=1)
+    erf_hours = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True,
+                                    verbose_name='ERF Hours', default=0)
+    erf_costs = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True,
+                                    verbose_name='ERF Costs', default=0)
+
+    class Meta:
+        managed = True
+        verbose_name_plural = "Estimate Reference File"
+        db_table = 'erf'
+        app_label = 'z_tab_pmb_quantum'
+        ordering = ['erf_code']
+
+    def __str__(self):
+        return f"{self.erf_code} - {self.erf_title}"
+
+
 class ProjectPhases(models.Model):
     project_phase_code = models.CharField(unique=True, max_length=5, verbose_name='Project Phase Code')
     project_phase_title = models.CharField(max_length=55, blank=True, null=True, verbose_name='Project Phase Title')
@@ -49,11 +72,65 @@ class ProjectStages(models.Model):
         return f"{self.project_stage_code} - {self.project_stage_title}"
 
 
+# Contract Style	Contract Type
+# Self-Perform	Time and Materials
+# Subcontract	Turnkey
+# 	Unit Rate aka Unit Price
+# 	Bill of Quantities
+# 	Cost Plus
+# 	Day Rate aka Time
+# 	Lumpsum aka Fixed Price
+
+
+class PmbL03WpContractStyle(models.Model):
+    pmb_L03_wp_contract_style_code = models.CharField(unique=True, max_length=5,
+                                                      verbose_name='PMB L03 Contract Style Code')
+    pmb_L03_wp_contract_style_title = models.CharField(unique=True, max_length=55, blank=True, null=True,
+                                                       verbose_name='PMB L03 Contract Style Title')
+    comments = models.CharField(max_length=2000, blank=True, null=True, verbose_name='Comments')
+
+    class Meta:
+        managed = True
+        verbose_name_plural = "PMB L03 Work Package Contract Styles"
+        db_table = 'pmb_L03_wp_contract_style'
+        app_label = 'z_tab_pmb_quantum'
+        ordering = ['pmb_L03_wp_contract_style_code']
+
+    # def __str__(self):
+    #     return str('%s' % self.contract_pricing_style_code)
+    def __str__(self):
+        return f"{self.pmb_L03_wp_contract_style_code} - {self.pmb_L03_wp_contract_style_title}"
+
+
+class PmbL03WpContractType(models.Model):
+    pmb_L03_wp_contract_type_code = models.CharField(unique=True, max_length=5,
+                                                     verbose_name='PMB L03 Contract Type Code')
+    pmb_L03_wp_contract_type_title = models.CharField(unique=True, max_length=55, blank=True, null=True,
+                                                      verbose_name='PMB L03 Contract Type Title')
+    comments = models.CharField(max_length=2000, blank=True, null=True, verbose_name='Comments')
+
+    class Meta:
+        managed = True
+        verbose_name_plural = "PMB L03 Work Package Contract Types"
+        db_table = 'pmb_L03_wp_contract_type'
+        app_label = 'z_tab_pmb_quantum'
+        ordering = ['pmb_L03_wp_contract_type_code']
+
+    def __str__(self):
+        return f"{self.pmb_L03_wp_contract_type_code} - {self.pmb_L03_wp_contract_type_title}"
+
+
 class PmbL03Wp(models.Model):
+    # for Functions (Engineering, Procurement, etc.)
     pmb_L03_wp_exe_type = models.ForeignKey(PmbL03WpExecutionType, on_delete=models.CASCADE,
                                             verbose_name='PMB L03 WP Execution Type ID', default=1)
-    pmb_L03_wp_exe_style = models.ForeignKey(PmbL03WpExecutionStyle, on_delete=models.CASCADE,
-                                             verbose_name='PMB L03 WP Execution Style ID', default=1)
+    # For Self-Perform or Subcontract
+    pmb_L03_wp_contract_style = models.ForeignKey(PmbL03WpContractStyle, on_delete=models.CASCADE,
+                                                  verbose_name='PMB L03 WP Contract Style ID', default=1)
+    # LSTK, Cost-Plus, Time & Materials, etc.
+    pmb_L03_wp_contract_type = models.ForeignKey(PmbL03WpContractType, on_delete=models.CASCADE,
+                                                 verbose_name='PMB L03 WP Contract Type ID', default=1)
+    # Contract, Overrun, etc.
     pmb_L03_wp_status_type = models.ForeignKey(PmbL03WpStatusType, on_delete=models.CASCADE,
                                                verbose_name='PMB L03 WP Status Type ID', default=1)
     wbs = models.ForeignKey(WBS, on_delete=models.CASCADE,
@@ -120,6 +197,21 @@ class PmbL03Wp(models.Model):
                                     verbose_name='CFB Hours', default=0)
     cfb_costs = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True,
                                     verbose_name='CFB Costs', default=0)
+    cumulative_bac_costs = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True,
+                                               verbose_name='To-Date aka Cumulative BAC Costs', default=0)
+    cumulative_pv_costs = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True,
+                                              verbose_name='To-Date aka Cumulative PV Costs', default=0)
+    cumulative_ev_costs = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True,
+                                              verbose_name='To-Date aka Cumulative EV Costs', default=0)
+    cumulative_ac_costs = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True,
+                                              verbose_name='To-Date aka Cumulative Actual Costs', default=0)
+    cumulative_invoiced_costs = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True,
+                                                    verbose_name='To-Date aka Cumulative Invoiced Costs', default=0)
+    cumulative_incurred_costs = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True,
+                                                    verbose_name='To-Date aka Cumulative Incurred Costs', default=0)
+
+    # last_updated = models.DateTimeField(blank=True, null=True,
+    #                                     verbose_name='Last Updated Date')
 
     class Meta:
         managed = True
@@ -253,6 +345,8 @@ class Trends(models.Model):
                                       verbose_name='Trend Type ID', default=1)
     tm_trend_approval_status = models.ForeignKey(TrendApprovalStatuses, on_delete=models.CASCADE,
                                                  verbose_name='Trend Approval Status ID', default=1)
+    # erf = models.ForeignKey(ERF, on_delete=models.CASCADE,
+    #                                   verbose_name='ERF ID', default=1)
     # project_phase = models.ForeignKey(ProjectPhases, on_delete=models.CASCADE,
     #                                   verbose_name='Project Phase ID', default=1)
     # project_stage = models.ForeignKey(ProjectStages, on_delete=models.CASCADE,
@@ -316,12 +410,12 @@ class PmbL03WpCaDetails(models.Model):
 class PmbL03WpCaScopeItems(models.Model):
     pmb_L03_wp_ca = models.ForeignKey(PmbL03WpCa, on_delete=models.CASCADE,
                                       verbose_name='PMB L03 WP CA ID', default=1)
-    pmb_L03_wp_ca_scope_item_code = models.CharField(unique=True, max_length=55, verbose_name='PMB L03 WP CA Scope '
-                                                                                              'Item Code')
+    pmb_L03_wp_ca_scope_item_code = models.CharField(unique=False, max_length=100, verbose_name='PMB L03 WP CA Scope '
+                                                                                               'Item Code')
     pmb_L03_wp_ca_scope_item_title = models.CharField(unique=False, max_length=200, blank=True, null=True,
                                                       verbose_name='PMB L03 WP CA Scope Item Title')
-    pmb_L03_wp_ca_scope_item_no = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)],
-                                                      verbose_name='Step Number')
+    # pmb_L03_wp_ca_scope_item_no = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)],
+    #                                                   verbose_name='Step Number')
     # scope_item_quantity = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True,
     #                                           verbose_name='Scope Item Quantity', default=0)
     # uom = models.ForeignKey(UOM, on_delete=models.CASCADE, verbose_name='CBWP UOM ID', default=1)
@@ -337,12 +431,10 @@ class PmbL03WpCaScopeItems(models.Model):
         db_table = 'pmb_L03_wp_ca_scope_item'
         app_label = 'z_tab_pmb_quantum'
         ordering = ['pmb_L03_wp_ca_scope_item_code']
-        unique_together = [
-            ['pmb_L03_wp_ca_scope_item_code', 'pmb_L03_wp_ca_scope_item_title', 'pmb_L03_wp_ca_scope_item_no']]
+        unique_together = ['pmb_L03_wp_ca', 'pmb_L03_wp_ca_scope_item_code', ]
 
     def __str__(self):
-        return f"{self.pmb_L03_wp_ca_scope_item_code} - {self.pmb_L03_wp_ca_scope_item_title} " \
-               f"- {self.pmb_L03_wp_ca_scope_item_no}"
+        return f"{self.pmb_L03_wp_ca_scope_item_code} - {self.pmb_L03_wp_ca_scope_item_title} "
 
 
 class PmbL03WpCaScopeItemDetails(models.Model):
@@ -367,8 +459,8 @@ class PmbL03WpCaScopeItemDetails(models.Model):
         db_table = 'pmb_L03_wp_ca_scope_item_detail'
         app_label = 'z_tab_pmb_quantum'
         # ordering = ['pmb_L03_wp_ca_scope_item_code']
-        # unique_together = [
-        #     ['pmb_L03_wp_ca_scope_item_code', 'pmb_L03_wp_ca_scope_item_title', 'pmb_L03_wp_ca_scope_item_no']]
+        unique_together = [
+            ['pmb_L03_wp_ca_scope_item', 'modified_date', ]]
 
     def __str__(self):
         return f"{self.pmb_L03_wp_ca_scope_item} - {self.modified_date}"
@@ -378,13 +470,13 @@ class PmbL04Wp(models.Model):
     # pmb_L03_wp_ca = models.ForeignKey(PmbL03WpCa, on_delete=models.CASCADE,
     #                                   verbose_name='PMB L03 WP CA ID ID', default=1)
     pmb_L03_wp_ca_scope_item = models.ForeignKey(PmbL03WpCaScopeItems, on_delete=models.CASCADE,
-                                       verbose_name='PMB L03 WP CA Scope Item ID', default=1)
+                                                 verbose_name='PMB L03 WP CA Scope Item ID', default=1)
     pmb_L04_wp_exe_type = models.ForeignKey(PmbL04WpExecutionType, on_delete=models.CASCADE,
                                             verbose_name='PMB L04 WP Execution Type ID', default=1)
     pmb_L04_wp_status_type = models.ForeignKey(PmbL04WpStatusType, on_delete=models.CASCADE,
                                                verbose_name='PMB L04 WP Status Type ID', default=1)
     was = models.ForeignKey(WAS, on_delete=models.CASCADE,
-                                               verbose_name='Work Area ID', default=1)
+                            verbose_name='Work Area ID', default=1)
     commodity_type = models.ForeignKey(CommodityType, on_delete=models.CASCADE,
                                        verbose_name='CBWP Commodity Type ID', default=1)
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE,
