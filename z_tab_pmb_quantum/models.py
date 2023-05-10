@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from a_hr.models import Personnel, RaciMatrixDefinition, StakeholderRoles
+from a_hr.models import Personnel, RaciMatrixDefinition, StakeholderRoles, Company
 from b_wbs.models import WAS, CostTypeClass, CostType, Department, Discipline, WBSType, WBS, FacilitySystem, \
     FacilitySystemDetail, PmbL03WpExecutionType, PmbL04WpExecutionType, PmbL03WpStatusType, PmbL04WpStatusType, \
     PmbL03WpExecutionStyle
@@ -124,6 +124,9 @@ class PmbL03Wp(models.Model):
     # for Functions (Engineering, Procurement, etc.)
     pmb_L03_wp_exe_type = models.ForeignKey(PmbL03WpExecutionType, on_delete=models.CASCADE,
                                             verbose_name='PMB L03 WP Execution Type ID', default=1)
+    # Stakeholder identifier (i.e Which entity or company they belong to)
+    pmb_L03_wp_company = models.ForeignKey(Company, on_delete=models.CASCADE,
+                                           verbose_name='PMB L03 WP Company ID', default=1)
     # For Self-Perform or Subcontract
     pmb_L03_wp_contract_style = models.ForeignKey(PmbL03WpContractStyle, on_delete=models.CASCADE,
                                                   verbose_name='PMB L03 WP Contract Style ID', default=1)
@@ -411,7 +414,7 @@ class PmbL03WpCaScopeItems(models.Model):
     pmb_L03_wp_ca = models.ForeignKey(PmbL03WpCa, on_delete=models.CASCADE,
                                       verbose_name='PMB L03 WP CA ID', default=1)
     pmb_L03_wp_ca_scope_item_code = models.CharField(unique=False, max_length=100, verbose_name='PMB L03 WP CA Scope '
-                                                                                               'Item Code')
+                                                                                                'Item Code')
     pmb_L03_wp_ca_scope_item_title = models.CharField(unique=False, max_length=200, blank=True, null=True,
                                                       verbose_name='PMB L03 WP CA Scope Item Title')
     # pmb_L03_wp_ca_scope_item_no = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)],
