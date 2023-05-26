@@ -300,9 +300,16 @@ class TrendTypes(models.Model):
                                        verbose_name='Trend Type Code')
     trend_type_title = models.CharField(unique=True, max_length=55, blank=True, null=True,
                                         verbose_name='Trend Type Title')
-    scope_related_check = models.IntegerField(default=0, verbose_name='Scope Related Check')
-
+    # scope_related_check = models.IntegerField(default=0, verbose_name='Scope Related Check')
     # 0 - Non-Scope Related; 1 - Scope Related
+    ocb_affected = models.CharField(unique=False, max_length=1,
+                                    verbose_name='OCB Affected', default="Y")
+    ccb_affected = models.CharField(unique=False, max_length=1,
+                                    verbose_name='CCB Affected', default="Y")
+    tfb_affected = models.CharField(unique=False, max_length=1,
+                                    verbose_name='TFB Affected', default="Y")
+    cfb_affected = models.CharField(unique=False, max_length=1,
+                                    verbose_name='CFB Affected', default="Y")
 
     class Meta:
         managed = True
@@ -384,7 +391,7 @@ class PmbL03WpCaDetails(models.Model):
                                       verbose_name='PMB L03 WP CA ID', default=1)
     tm_trend = models.ForeignKey(Trends, on_delete=models.CASCADE,
                                  verbose_name='Trend ID', default=1)
-    transaction_type = models.CharField(unique=False, max_length=10, verbose_name='Transaction Type')
+    # transaction_type = models.CharField(unique=False, max_length=10, verbose_name='Transaction Type')
     # Quantification, Pricing, Hours and Costs
     quantity = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True,
                                    verbose_name='Quantity', default=0)
