@@ -235,7 +235,7 @@ class PmbL03WpCa(models.Model):
     cost_type = models.ForeignKey(CostType, on_delete=models.CASCADE, verbose_name='CBWP Cost Type ID',
                                   default=1)
     commitment_check = models.CharField(default='N', verbose_name='Commitment Check', max_length=1)
-    pmb_L03_wp_ca_code = models.CharField(unique=True, max_length=55, verbose_name='PMB L03 WP CA Code')
+    pmb_L03_wp_ca_code = models.CharField(unique=False, max_length=55, verbose_name='PMB L03 WP CA Code')
     pmb_L03_wp_ca_title = models.CharField(unique=False, max_length=200, blank=True, null=True,
                                            verbose_name='PMB L03 WP CA Title')
     comments = models.CharField(max_length=200, blank=True, null=True, verbose_name='CBWP Comments')
@@ -290,6 +290,7 @@ class PmbL03WpCa(models.Model):
         db_table = 'pmb_L03_wp_ca'
         app_label = 'z_tab_pmb_quantum'
         ordering = ['pmb_L03_wp_ca_code']
+        unique_together = ['stakeholder_role','pmb_L03_wp_ca_code','cost_type','commitment_check']
 
     def __str__(self):
         return f"{self.pmb_L03_wp_ca_code} - {self.pmb_L03_wp_ca_title}"
@@ -652,3 +653,46 @@ class PmbL04WpQuantum(models.Model):
 
     def __str__(self):
         return f"{self.quantum_code} - {self.quantum_title}"
+
+
+class PmbL04WpAttachment(models.Model):
+    pmb_L04_wp = models.ForeignKey(PmbL04Wp, on_delete=models.CASCADE,
+                                   verbose_name='PMB L04 WP ID', default=1)
+    attachment_code = models.CharField(unique=True, max_length=100, verbose_name='Attachment Code')
+    attachment_title = models.CharField(max_length=100, verbose_name='Attachment Title')
+    revision_number = models.CharField(max_length=3, blank=True, null=True, verbose_name='Revision No')
+    revision_status = models.CharField(max_length=55, blank=True, null=True, verbose_name='Revision Status')
+    release_date = models.DateTimeField(blank=True, null=True, verbose_name='Release Date')
+    comments = models.CharField(max_length=2000, blank=True, null=True, verbose_name='Attachment Comments')
+    pmb_L04_wp_attachment = models.FileField(blank=True, null=True, upload_to='CBWPAttachments/',
+                                             verbose_name='Attachments')
+    pmb_L04_wp_url = models.URLField(blank=True, null=True, max_length=250, verbose_name='Attachment URL')
+
+    class Meta:
+        managed = True
+        verbose_name_plural = 'PMB L04 Attachments'
+        db_table = 'pmb_L04_wp_attachment'
+        app_label = 'z_tab_pmb_quantum'
+        ordering = ['attachment_code']
+
+    def __str__(self):
+        return str('%s' % self.attachment_code)
+
+
+class PmbL04WpNote(models.Model):
+    pmb_L04_wp = models.ForeignKey(PmbL04Wp, on_delete=models.CASCADE,
+                                   verbose_name='PMB L04 WP ID', default=1)
+    note_no = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)], verbose_name='Note Number')
+    title = models.CharField(max_length=100, verbose_name='CBWP Note Title')
+    comments = models.CharField(max_length=2000, blank=True, null=True, verbose_name='Comments')
+
+    class Meta:
+        managed = True
+        verbose_name_plural = "PMB L04 Notes"
+        db_table = 'pmb_L04_wp_note'
+        app_label = 'z_tab_pmb_quantum'
+        ordering = ['title']
+        unique_together = ['pmb_L04_wp', 'title', ]
+
+    def __str__(self):
+        return str('%s' % self.title)
