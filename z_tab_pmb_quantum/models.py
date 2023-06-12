@@ -16,29 +16,6 @@ from e_commodities.models import CommodityDetail
 from g_measures.models import MilepostTemplate
 
 
-class ERF(models.Model):
-    erf_code = models.CharField(unique=True, max_length=55, verbose_name='ERF Code')
-    erf_title = models.CharField(unique=False, max_length=200, blank=True, null=True,
-                                 verbose_name='ERF Title')
-    comments = models.CharField(max_length=2000, blank=True, null=True, verbose_name='Comments')
-    cost_type = models.ForeignKey(CostType, on_delete=models.CASCADE, verbose_name='Cost Type ID',
-                                  default=1)
-    erf_hours = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True,
-                                    verbose_name='ERF Hours', default=0)
-    erf_costs = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True,
-                                    verbose_name='ERF Costs', default=0)
-
-    class Meta:
-        managed = True
-        verbose_name_plural = "Estimate Reference File"
-        db_table = 'erf'
-        app_label = 'z_tab_pmb_quantum'
-        ordering = ['erf_code']
-
-    def __str__(self):
-        return f"{self.erf_code} - {self.erf_title}"
-
-
 class ProjectPhases(models.Model):
     project_phase_code = models.CharField(unique=True, max_length=5, verbose_name='Project Phase Code')
     project_phase_title = models.CharField(max_length=55, blank=True, null=True, verbose_name='Project Phase Title')
@@ -225,6 +202,32 @@ class PmbL03Wp(models.Model):
 
     def __str__(self):
         return f"{self.pmb_L03_wp_code} - {self.pmb_L03_wp_title}"
+
+
+class ERF(models.Model):
+    pmb_L03_wp = models.ForeignKey(PmbL03Wp, on_delete=models.CASCADE,
+                                   verbose_name='PMB L03 WP ID', default=1)
+    erf_code = models.CharField(unique=True, max_length=55, verbose_name='ERF Code')
+    erf_title = models.CharField(unique=False, max_length=200, blank=True, null=True,
+                                 verbose_name='ERF Title')
+    comments = models.CharField(max_length=2000, blank=True, null=True, verbose_name='Comments')
+    cost_type = models.ForeignKey(CostType, on_delete=models.CASCADE, verbose_name='Cost Type ID',
+                                  default=1)
+    erf_hours = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True,
+                                    verbose_name='ERF Hours', default=0)
+    erf_costs = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True,
+                                    verbose_name='ERF Costs', default=0)
+
+    class Meta:
+        managed = True
+        verbose_name_plural = "Estimate Reference File"
+        db_table = 'erf'
+        app_label = 'z_tab_pmb_quantum'
+        ordering = ['erf_code']
+
+    def __str__(self):
+        return f"{self.erf_code} - {self.erf_title}"
+
 
 
 class PmbL03WpCa(models.Model):
