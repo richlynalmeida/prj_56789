@@ -229,6 +229,63 @@ class ERF(models.Model):
         return f"{self.erf_code} - {self.erf_title}"
 
 
+class PmbL03WpRaciInformation(models.Model):
+    pmb_L03_wp = models.ForeignKey(PmbL03Wp, on_delete=models.CASCADE,
+                                   verbose_name='PMB L03 WP ID', default=1)
+    personnel = models.ForeignKey(Personnel, verbose_name='Personnel ID', on_delete=models.CASCADE)
+    raci = models.ForeignKey(RaciMatrixDefinition, verbose_name='Raci ID', on_delete=models.CASCADE)
+    comments = models.CharField(max_length=2000, blank=True, null=True, verbose_name='Comments')
+
+    class Meta:
+        managed = True
+        verbose_name_plural = "PMB L03 WP RACI Information"
+        db_table = 'pmb_L03_wp_raci_info'
+        app_label = 'z_tab_pmb_quantum'
+        unique_together = ['pmb_L03_wp', 'personnel', 'raci']
+
+
+class PmbL03WpNote(models.Model):
+    pmb_L03_wp = models.ForeignKey(PmbL03Wp, on_delete=models.CASCADE,
+                                   verbose_name='PMB L03 WP ID', default=1)
+    note_no = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(1000)],
+                                  verbose_name='Note Number')
+    title = models.CharField(max_length=100, verbose_name='Title')
+    comments = models.CharField(max_length=2000, blank=True, null=True, verbose_name='Comments')
+
+    class Meta:
+        managed = True
+        verbose_name_plural = "PMB L03 WP Notes"
+        db_table = 'pmb_L03_wp_note'
+        app_label = 'z_tab_pmb_quantum'
+        ordering = ['title']
+
+    def __str__(self):
+        return str('%s' % self.title)
+
+
+class PmbL03WpAttachment(models.Model):
+    pmb_L03_wp = models.ForeignKey(PmbL03Wp, on_delete=models.CASCADE,
+                                   verbose_name='PMB L03 WP ID', default=1)
+    attachment_code = models.CharField(unique=True, max_length=100, verbose_name='Attachment Code')
+    attachment_title = models.CharField(max_length=100, verbose_name='Attachment Title')
+    revision_number = models.CharField(max_length=3, blank=True, null=True, verbose_name='Revision No')
+    revision_status = models.CharField(max_length=55, blank=True, null=True, verbose_name='Revision Status')
+    release_date = models.DateTimeField(blank=True, null=True, verbose_name='Release Date')
+    comments = models.CharField(max_length=2000, blank=True, null=True, verbose_name='PMB L03 WP Attachment Comments')
+    pmb_L03_wp_attachment = models.FileField(blank=True, null=True, upload_to='PMB_L03_WP_Attachments/',
+                                             verbose_name='PMB L03 WP Attachments')
+    pmb_L03_wp_url = models.URLField(blank=True, null=True, max_length=250, verbose_name='PMB L03 WP URL')
+
+    class Meta:
+        managed = True
+        verbose_name_plural = "PMB L03 WP Attachments"
+        db_table = 'pmb_L03_wp_attachment'
+        app_label = 'z_tab_pmb_quantum'
+        ordering = ['attachment_code']
+
+    def __str__(self):
+        return str('%s' % self.attachment_code)
+
 
 class PmbL03WpCa(models.Model):
     pmb_L03_wp = models.ForeignKey(PmbL03Wp, on_delete=models.CASCADE,
@@ -293,7 +350,7 @@ class PmbL03WpCa(models.Model):
         db_table = 'pmb_L03_wp_ca'
         app_label = 'z_tab_pmb_quantum'
         ordering = ['pmb_L03_wp_ca_code']
-        unique_together = ['stakeholder_role','pmb_L03_wp_ca_code','cost_type','commitment_check']
+        unique_together = ['stakeholder_role', 'pmb_L03_wp_ca_code', 'cost_type', 'commitment_check']
 
     def __str__(self):
         return f"{self.pmb_L03_wp_ca_code} - {self.pmb_L03_wp_ca_title}"
@@ -526,6 +583,21 @@ class PmbL04Wp(models.Model):
         return f"{self.pmb_L04_wp_code} - {self.pmb_L04_wp_title}"
 
 
+class PmbL04WpRaciInformation(models.Model):
+    pmb_L04_wp = models.ForeignKey(PmbL03Wp, on_delete=models.CASCADE,
+                                   verbose_name='PMB L04 WP ID', default=1)
+    personnel = models.ForeignKey(Personnel, verbose_name='Personnel ID', on_delete=models.CASCADE)
+    raci = models.ForeignKey(RaciMatrixDefinition, verbose_name='Raci ID', on_delete=models.CASCADE)
+    comments = models.CharField(max_length=2000, blank=True, null=True, verbose_name='Comments')
+
+    class Meta:
+        managed = True
+        verbose_name_plural = "PMB L04 WP RACI Information"
+        db_table = 'pmb_L04_wp_raci_info'
+        app_label = 'z_tab_pmb_quantum'
+        unique_together = ['pmb_L04_wp', 'personnel', 'raci']
+
+
 class ProjectComponent(models.Model):
     # A project component technically is a unique thing on a project, however we need the ability to reuse it
     # with the same identification across multiple functions. For e.g A pump "ABC-001" needs to be identified
@@ -667,7 +739,7 @@ class PmbL04WpAttachment(models.Model):
     revision_status = models.CharField(max_length=55, blank=True, null=True, verbose_name='Revision Status')
     release_date = models.DateTimeField(blank=True, null=True, verbose_name='Release Date')
     comments = models.CharField(max_length=2000, blank=True, null=True, verbose_name='Attachment Comments')
-    pmb_L04_wp_attachment = models.FileField(blank=True, null=True, upload_to='CBWPAttachments/',
+    pmb_L04_wp_attachment = models.FileField(blank=True, null=True, upload_to='PMB_L04_WP_Attachments/',
                                              verbose_name='Attachments')
     pmb_L04_wp_url = models.URLField(blank=True, null=True, max_length=250, verbose_name='Attachment URL')
 
@@ -685,7 +757,7 @@ class PmbL04WpAttachment(models.Model):
 class PmbL04WpNote(models.Model):
     pmb_L04_wp = models.ForeignKey(PmbL04Wp, on_delete=models.CASCADE,
                                    verbose_name='PMB L04 WP ID', default=1)
-    note_no = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)], verbose_name='Note Number')
+    note_no = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(1000)], verbose_name='Note Number')
     title = models.CharField(max_length=100, verbose_name='CBWP Note Title')
     comments = models.CharField(max_length=2000, blank=True, null=True, verbose_name='Comments')
 
